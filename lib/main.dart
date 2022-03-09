@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
       routes:{
         '/':(context) => MyHomePage(),
         '/post':(context) => NewPost(),
-        '/details':(context) => Details(),
       },
       //home: const MyHomePage(),
     );
