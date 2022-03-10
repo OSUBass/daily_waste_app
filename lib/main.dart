@@ -25,7 +25,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wastagram',
       theme: ThemeData(
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.blue,
+        canvasColor: Color.fromARGB(255, 5, 51, 8)
       ),
       initialRoute: '/',
       routes:{

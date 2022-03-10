@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:wasteagram/screens/list_screen.dart';
 import 'package:wasteagram/models/post_model.dart';
 
 class Details extends StatelessWidget {
@@ -15,16 +11,46 @@ class Details extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Details'),
+        title: const Text('Wastegram'),
+        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Text('pic is ${details.wastePic}'),
-          Text('num wasted is ${details.wasteNum}'),
-          Text('date is ${details.wasteDate}'),
-          Text('long is ${details.wasteLong}'),
-          Text('lat is ${details.wasteLat}'),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            const Padding(
+              padding: EdgeInsetsDirectional.all(15),
+            ),
+            const SizedBox(height:40),
+            Text('${details.wasteDate}',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+            ) ),
+            const SizedBox(height:60),
+             Expanded(
+               child: Image.network('${details.wastePic}',
+                  height: 200,
+                  ),
+             ),
+          
+            const SizedBox(height:60),
+            Text('${details.wasteNum} items leftover',
+              style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+              ) ),
+            const SizedBox(height:60),
+            Text('Location (${details.wasteLat} , ${details.wasteLong})',
+            style: const TextStyle(
+                fontSize: 17,
+                color: Colors.white,
+            ) ),
+            const SizedBox(height:40),
+          ],
+        ),
       ),
     );
   }

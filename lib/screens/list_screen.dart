@@ -22,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:const Text('List View'),
+        title:const Text('Wasteagram'),
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -34,17 +34,31 @@ class _MyHomePageState extends State<MyHomePage> {
             return const CircularProgressIndicator();
           }else{
             List allPosts = snapshot.data!.docs;
-            return ListView.builder(
+            return ListView.separated(
               itemCount: allPosts.length,
               itemBuilder: (context, index) {
                 Post currentPost = Post.fromFirestore(allPosts[index]);
                   return ListTile(
-                    title: Text('${currentPost.wasteDate}'),
-                    trailing: Text('${currentPost.wasteNum}'),
+                    tileColor: Color.fromARGB(255, 243, 239, 202),
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage('${currentPost.wastePic}'),
+                    ),
+                    title: Text('${currentPost.wasteDate}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                    ) ),
+                    trailing: Text('${currentPost.wasteNum}',
+                      style: const TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold
+                    ) ),
                     onTap: () => 
                       Navigator.push(context,MaterialPageRoute(
                         builder: (context) => Details(details: currentPost)),
                       ));
+              },
+              separatorBuilder: (context, index){
+                return Divider(height: 3, color:Color.fromARGB(255, 165, 3, 57));
               }
             );
           }
@@ -52,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () =>Navigator.pushNamed(context, '/post'),
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_task),
       ));
   }
 }
