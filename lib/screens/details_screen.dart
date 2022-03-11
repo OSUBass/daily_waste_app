@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:wasteagram/models/post_model.dart';
+import 'package:wasteagram/services/style.dart';
 
 class Details extends StatelessWidget {
   final Post details;
@@ -23,11 +24,7 @@ class Details extends StatelessWidget {
             ),
             const SizedBox(height:40),
             Text('${details.wasteDate}',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-            ) ),
+              style: WasteStyle.wasteDateDetails),
             const SizedBox(height:60),
              Expanded(
                child: Image.network('${details.wastePic}',
@@ -37,17 +34,10 @@ class Details extends StatelessWidget {
           
             const SizedBox(height:60),
             Text('${details.wasteNum} items leftover',
-              style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-              ) ),
+              style: WasteStyle.wasteNumDetails),
             const SizedBox(height:60),
             Text('Location (${details.wasteLat} , ${details.wasteLong})',
-            style: const TextStyle(
-                fontSize: 17,
-                color: Colors.white,
-            ) ),
+            style: WasteStyle.wasteLocDetails),
             const SizedBox(height:40),
           ],
         ),

@@ -1,36 +1,33 @@
-//import 'dart:html';
-import 'package:flutter/material.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:wasteagram/services/db.dart';
-import 'package:location/location.dart';
-import 'package:wasteagram/services/photo_storage.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:location/location.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
+import 'package:wasteagram/services/photo_services.dart';
 import 'package:wasteagram/services/location.dart';
+import 'package:wasteagram/services/db.dart';
 
 class NewPost extends StatefulWidget {
-  const NewPost({ Key? key }) : super(key: key);
+
+  final File? image;
+  const NewPost({ Key? key, required this.image }) : super(key: key);
 
   @override
   State<NewPost> createState() => _NewPostState();
 }
 
 class _NewPostState extends State<NewPost> {
-  String wastePic = 'pic here'; 
-  int wasteNum = 0; 
+  String wastePic = 
+    'https://firebasestorage.googleapis.com/v0/b/wasteagram-15796.appspot.com/o/no%20photo.png?alt=media&token=1190ebf9-00ae-447f-a08c-4c3224a9a519'; 
+  int? wasteNum; 
   String wasteLat = '0'; 
   String wasteLong= '0';
-  File? image;
-  final picker = ImagePicker();
+  bool _validate = false;
+  final TextInputFormatter numOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 
   LocationData? locationData;
-
-  //gets selected image and path using filepicker
-  void getImage() async {
-    final pickedFile = await picker.pickImage(source:ImageSource.gallery);
-    image = File(pickedFile!.path);
-    setState(() {});
-  }
 
   @override
   void initState(){
@@ -52,8 +49,15 @@ class _NewPostState extends State<NewPost> {
     setState(() {});
   }
 
+  bool validateInput(String value){
+        RegExp regExp = RegExp(r'^[0-9999]+');
+        return regExp.hasMatch(value);
+  }
+
   @override
   Widget build(BuildContext context) {
+    //image = ModalRoute.of(context)!.settings.arguments as File;
+    
     if (locationData == null){
       return const Center(child: CircularProgressIndicator());
     }else{
@@ -65,48 +69,37 @@ class _NewPostState extends State<NewPost> {
           child: Center(
             child: Column(
               children: [
-                if (image == null)...[
-                  const SizedBox(height: 25,),
-                  const Text('Tap to upload pic',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),),
-                  GestureDetector(
-                    child: const Icon(
-                      Icons.add_a_photo, 
-                      size: 250,
-                      color: Colors.white,
-                    ),
-                    onTap: () => getImage(),
-                  ),
-                ]else...[
-                  Container(
-                      padding: EdgeInsets.all(25),
-                      height: 300,
-                      width: 300,
-                      child: Image.file(image!)
-                  ),
-                ],
+                Container(
+                    padding: const EdgeInsets.all(25),
+                    height: 300,
+                    width: 300,
+                    child: Image.file(widget.image!)
+                ),
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: TextField(
                     autofocus: true,
+                    inputFormatters:[numOnly],
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
-                    maxLength: 4,
+                    maxLength: 3,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
                       filled:true,
                       fillColor: Colors.white,
                       hintText: 'Enter the number of wasted items',
-                      hintStyle: TextStyle(
+                      errorText: _validate ? 'Please enter a number from 0-999' : null,
+                      hintStyle: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold ),
                     ),
-                    onChanged: (value) => setState(() => wasteNum = int.parse(value)),
+                    onChanged: (value){
+                      if(validateInput(value)){
+                        setState(() => wasteNum = int.parse(value));
+                      }
+                    },
                   ),
                 ),
                 const SizedBox(height: 160,),
@@ -121,12 +114,17 @@ class _NewPostState extends State<NewPost> {
                           ),
                     ),
                     onTap: () async  {
-                      wasteLong = locationData!.longitude.toString();
-                      wasteLat = locationData!.latitude.toString();
-                      wastePic = await Pic().addPic(image!);
-                      await DatabaseService().addPost(wastePic, wasteNum, wasteLat, wasteLong);
-                    
-                      Navigator.pop(context);
+                      if(wasteNum != null){
+                        EasyLoading.show(status: 'loading...');
+                        wasteLong = locationData!.longitude.toString();
+                        wasteLat = locationData!.latitude.toString();
+                        if (widget.image != null){wastePic = await PicServices().addPic(widget.image!);}
+                        await DatabaseService().addPost(wastePic, wasteNum!, wasteLat, wasteLong);
+                        EasyLoading.dismiss();
+                        Navigator.pop(context);
+                      }else{
+                       setState((){_validate = true;});
+                      }
                     },
                   ),
               ],

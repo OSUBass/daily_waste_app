@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+
+import 'package:wasteagram/components/waste_list_tile.dart';
+import 'package:wasteagram/components/waste_pic.dart';
 import 'package:wasteagram/models/post_model.dart';
-import 'package:wasteagram/screens/details_screen.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
+class WasteList extends StatefulWidget {
+  const WasteList({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<WasteList> createState() => _WasteList();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _WasteList extends State<WasteList> {
+  //stream for wasteagram posts
   final Stream<QuerySnapshot> _postStream = 
-    FirebaseFirestore.instance.collection('posts').snapshots();
+    FirebaseFirestore.instance.collection('posts').orderBy('wasteDate', descending: true).snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -31,42 +32,30 @@ class _MyHomePageState extends State<MyHomePage> {
           if (snapshot.hasError) {return const Text('Error');}
           
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }else{
-            List allPosts = snapshot.data!.docs;
-            return ListView.separated(
-              itemCount: allPosts.length,
-              itemBuilder: (context, index) {
-                Post currentPost = Post.fromFirestore(allPosts[index]);
-                  return ListTile(
-                    tileColor: Color.fromARGB(255, 243, 239, 202),
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage('${currentPost.wastePic}'),
-                    ),
-                    title: Text('${currentPost.wasteDate}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                    ) ),
-                    trailing: Text('${currentPost.wasteNum}',
-                      style: const TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold
-                    ) ),
-                    onTap: () => 
-                      Navigator.push(context,MaterialPageRoute(
-                        builder: (context) => Details(details: currentPost)),
-                      ));
-              },
-              separatorBuilder: (context, index){
-                return Divider(height: 3, color:Color.fromARGB(255, 165, 3, 57));
-              }
-            );
+            EasyLoading.show(status: 'Loading....');
+            return Container();}
+
+          //Collect list of post docs
+          List allPosts = snapshot.data!.docs;
+          
+          //Show Loading widget if post docs do not exist
+          if(allPosts.isEmpty){EasyLoading.show(status: 'No Data Yet');}
+          else{EasyLoading.dismiss();}
+          
+          //Create Scrollable list tiles of all Waste posts from snapshot
+          return ListView.separated(
+            itemCount: allPosts.length,
+            itemBuilder: (context, index) {
+              Post currentPost = Post.fromFirestore(allPosts[index]);
+              return WasteListTile(currentPost: currentPost);
+            },
+            separatorBuilder: (context, index){return const Divider(height: 3,);}
+          );
           }
-        }
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () =>Navigator.pushNamed(context, '/post'),
-        child: const Icon(Icons.add_task),
-      ));
+      
+      floatingActionButton: const WastePic(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, 
+      );
   }
 }

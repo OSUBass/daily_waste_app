@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 import 'package:wasteagram/screens/list_screen.dart';
-import 'package:wasteagram/screens/new_post_screen.dart';
-import 'package:wasteagram/screens/details_screen.dart';
 
 
 
@@ -26,14 +23,13 @@ class MyApp extends StatelessWidget {
       title: 'Wastagram',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        canvasColor: Color.fromARGB(255, 5, 51, 8)
+        canvasColor: const Color.fromARGB(255, 5, 51, 8)
       ),
+      builder: EasyLoading.init(),
       initialRoute: '/',
       routes:{
-        '/':(context) => MyHomePage(),
-        '/post':(context) => NewPost(),
+        '/':(context) => const WasteList(),
       },
-      //home: const MyHomePage(),
     );
   }
 }
