@@ -9,13 +9,28 @@ import 'package:wasteagram/screens/new_post_screen.dart';
 
 
 class WasteList extends StatefulWidget {
-  const WasteList({Key? key}) : super(key: key);
+  const WasteList({Key? key, required this.observer, required this.analytics}) : 
+    super(key: key);
+  
+  final FirebaseAnalytics analytics;
+  final FirebaseAnalyticsObserver observer;
 
   @override
   State<WasteList> createState() => _WasteList();
 }
 
 class _WasteList extends State<WasteList> {
+
+  @override
+  void initState() {
+    super.initState();
+     _logAppOpen();
+  }
+
+  //send analytics for log open appevent
+  void _logAppOpen() async {
+      await widget.analytics.logAppOpen();
+    }
   //stream for wasteagram posts
   final Stream<QuerySnapshot> _postStream = 
     FirebaseFirestore.instance.collection('posts').orderBy('wasteDate', descending: true).snapshots();

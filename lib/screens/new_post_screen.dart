@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:location/location.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import 'package:wasteagram/components/submit.dart';
+import 'package:wasteagram/components/food_pic.dart';
 import 'package:wasteagram/services/photo_services.dart';
 import 'package:wasteagram/services/location.dart';
-import 'package:wasteagram/services/db.dart';
+import 'package:wasteagram/services/style.dart';
 
 class NewPost extends StatefulWidget {
 
@@ -18,14 +18,9 @@ class NewPost extends StatefulWidget {
 }
 
 class _NewPostState extends State<NewPost> {
-  String wastePic = 
-    'https://firebasestorage.googleapis.com/v0/b/wasteagram-15796.appspot.com/o/no%20photo.png?alt=media&token=1190ebf9-00ae-447f-a08c-4c3224a9a519'; 
   int? wasteNum; 
-  String wasteLat = '0'; 
-  String wasteLong= '0';
   bool _validate = false;
   final TextInputFormatter numOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
-
   LocationData? locationData;
   File? image;
 
@@ -38,10 +33,14 @@ class _NewPostState extends State<NewPost> {
     retrieveLocation(serviceEnabled, permissionGranted);
   }
 
+  //load pic
   void loadImageTwo ()async {
     image = await PicServices().getImage();
     setState(() {});
   }
+
+  //trigger error text if textbox is empty
+  void validateText() =>setState((){_validate = true;});
 
   void retrieveLocation(serviceEnabled, permissionGranted) async{
     Location location = Location();
@@ -51,18 +50,10 @@ class _NewPostState extends State<NewPost> {
       if(permission == PermissionStatus.granted){
         locationData = await location.getLocation();
       }
-    }
-    setState(() {});
-  }
-
-  bool validateInput(String value){
-        RegExp regExp = RegExp(r'^[0-9999]+');
-        return regExp.hasMatch(value);
-  }
+    }setState(() {});}
 
   @override
   Widget build(BuildContext context) {
-    //image = ModalRoute.of(context)!.settings.arguments as File;
     
     if (locationData == null){
       return const Center(child: CircularProgressIndicator());
@@ -75,16 +66,9 @@ class _NewPostState extends State<NewPost> {
           child: Center(
             child: Column(
               children: [
-                Container(
-                    padding: const EdgeInsets.all(25),
-                    height: 300,
-                    width: 300,
-                    child: Semantics(
-                      image:true,
-                      hint:'displays users previously selected image',
-                      //child: Image.file(widget.image!))
-                      child: Image.file(image!))
-                ),
+                //displays foodwaste image
+                FoodPic(image: image),
+                
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Semantics(
@@ -93,7 +77,6 @@ class _NewPostState extends State<NewPost> {
                     child: TextField(
                       autofocus: true,
                       inputFormatters:[numOnly],
-                      cursorColor: Colors.black,
                       textAlign: TextAlign.center,
                       maxLength: 3,
                       keyboardType: TextInputType.number,
@@ -103,48 +86,21 @@ class _NewPostState extends State<NewPost> {
                         fillColor: Colors.white,
                         hintText: 'Enter the number of wasted items',
                         errorText: _validate ? 'Please enter a number from 0-999' : null,
-                        hintStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold ),
-                      ),
+                        hintStyle: WasteStyle.hintText),
                       onChanged: (value){
-                        if(validateInput(value)){
                           setState(() => wasteNum = int.parse(value));
-                        }
                       },
                     ),
                   ),
                 ),
                 const SizedBox(height: 160,),
-                GestureDetector(
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          color: Colors.blue,
-                          child: Semantics(
-                            button: true,
-                            onTapHint:'upload data to database',
-                            child: const Icon(
-                              Icons.cloud_download,
-                              color: Colors.white,
-                              size: 120,
-                            ),
-                          ),
-                    ),
-                    onTap: () async  {
-                      if(wasteNum != null){
-                        EasyLoading.show(status: 'loading...');
-                        wasteLong = locationData!.longitude.toString();
-                        wasteLat = locationData!.latitude.toString();
-                        if (image != null){wastePic = await PicServices().addPic(image!);}
-                        await DatabaseService().addPost(wastePic, wasteNum!, wasteLat, wasteLong);
-                        EasyLoading.dismiss();
-                        Navigator.pop(context);
-                      }else{
-                       setState((){_validate = true;});
-                      }
-                    },
-                  ),
+                
+                //submits data to firebase after validation
+                Submit(locationData: locationData, 
+                  image: image, 
+                  wasteNum: wasteNum,
+                  validateText: validateText
+                )
               ],
             ),
           ),
