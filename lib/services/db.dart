@@ -12,7 +12,7 @@ class DatabaseService {
     return await postCollection.add({
       'wastePic': wastePic,
       'wasteNum': wasteNum,
-      'wasteDate': FieldValue.serverTimestamp(),
+      'wasteDate': DateTime.now().millisecondsSinceEpoch,
       'wasteLat': wasteLat,
       'wasteLong': wasteLong,
     }).then((value) {

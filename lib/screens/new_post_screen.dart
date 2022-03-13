@@ -11,8 +11,7 @@ import 'package:wasteagram/services/db.dart';
 
 class NewPost extends StatefulWidget {
 
-  final File? image;
-  const NewPost({ Key? key, required this.image }) : super(key: key);
+  const NewPost({Key? key,}) : super(key: key);
 
   @override
   State<NewPost> createState() => _NewPostState();
@@ -28,13 +27,20 @@ class _NewPostState extends State<NewPost> {
   final TextInputFormatter numOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 
   LocationData? locationData;
+  File? image;
 
   @override
   void initState(){
     super.initState();
+    loadImageTwo();
     bool serviceEnabled = false;
     PermissionStatus permissionGranted = PermissionStatus.denied;
     retrieveLocation(serviceEnabled, permissionGranted);
+  }
+
+  void loadImageTwo ()async {
+    image = await PicServices().getImage();
+    setState(() {});
   }
 
   void retrieveLocation(serviceEnabled, permissionGranted) async{
@@ -73,33 +79,41 @@ class _NewPostState extends State<NewPost> {
                     padding: const EdgeInsets.all(25),
                     height: 300,
                     width: 300,
-                    child: Image.file(widget.image!)
+                    child: Semantics(
+                      image:true,
+                      hint:'displays users previously selected image',
+                      //child: Image.file(widget.image!))
+                      child: Image.file(image!))
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20),
-                  child: TextField(
-                    autofocus: true,
-                    inputFormatters:[numOnly],
-                    cursorColor: Colors.black,
-                    textAlign: TextAlign.center,
-                    maxLength: 3,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      filled:true,
-                      fillColor: Colors.white,
-                      hintText: 'Enter the number of wasted items',
-                      errorText: _validate ? 'Please enter a number from 0-999' : null,
-                      hintStyle: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold ),
+                  child: Semantics(
+                    textField: true,
+                    hint:'entered value must be a number from 0-999',
+                    child: TextField(
+                      autofocus: true,
+                      inputFormatters:[numOnly],
+                      cursorColor: Colors.black,
+                      textAlign: TextAlign.center,
+                      maxLength: 3,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        filled:true,
+                        fillColor: Colors.white,
+                        hintText: 'Enter the number of wasted items',
+                        errorText: _validate ? 'Please enter a number from 0-999' : null,
+                        hintStyle: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold ),
+                      ),
+                      onChanged: (value){
+                        if(validateInput(value)){
+                          setState(() => wasteNum = int.parse(value));
+                        }
+                      },
                     ),
-                    onChanged: (value){
-                      if(validateInput(value)){
-                        setState(() => wasteNum = int.parse(value));
-                      }
-                    },
                   ),
                 ),
                 const SizedBox(height: 160,),
@@ -107,10 +121,14 @@ class _NewPostState extends State<NewPost> {
                         child: Container(
                           alignment: Alignment.bottomCenter,
                           color: Colors.blue,
-                          child: const Icon(
-                            Icons.cloud_download,
-                            color: Colors.white,
-                            size: 120,
+                          child: Semantics(
+                            button: true,
+                            onTapHint:'upload data to database',
+                            child: const Icon(
+                              Icons.cloud_download,
+                              color: Colors.white,
+                              size: 120,
+                            ),
                           ),
                     ),
                     onTap: () async  {
@@ -118,7 +136,7 @@ class _NewPostState extends State<NewPost> {
                         EasyLoading.show(status: 'loading...');
                         wasteLong = locationData!.longitude.toString();
                         wasteLat = locationData!.latitude.toString();
-                        if (widget.image != null){wastePic = await PicServices().addPic(widget.image!);}
+                        if (image != null){wastePic = await PicServices().addPic(image!);}
                         await DatabaseService().addPost(wastePic, wasteNum!, wasteLat, wasteLong);
                         EasyLoading.dismiss();
                         Navigator.pop(context);

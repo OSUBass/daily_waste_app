@@ -1,30 +1,94 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 import 'package:wasteagram/main.dart';
+import 'package:wasteagram/models/post_model.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  
+  test('Test1: Post created from Map has correct property values', () {
+    const url = 'Fake';
+    const quantity = 1;
+    final date = DateTime.now().millisecondsSinceEpoch;
+    const latitude = '1.0';
+    const longitude = '2.0';
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    final wasteagramPost = Post.fromMap({
+      'wastePic' : url,
+      'wasteNum' :quantity,
+      'wasteDate' : date,
+      'wasteLat' : latitude,
+      'wasteLong' : longitude,
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(wasteagramPost.wastePic, url);
+    expect(wasteagramPost.wasteNum, quantity);
+    expect(wasteagramPost.wasteDate, DateFormat.yMMMMEEEEd().format(DateTime.fromMillisecondsSinceEpoch(date)));
+    expect(wasteagramPost.wasteLat, latitude);
+    expect(wasteagramPost.wasteLong, longitude);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  });
+
+  test('Test2: Post created from Map has correct property values', () {
+    const url = 'Fake';
+    const quantity = 1000;
+    final date = DateTime.now().millisecondsSinceEpoch;
+    const latitude = '1.756745';
+    const longitude = '-232.0234323';
+
+    final wasteagramPost = Post.fromMap({
+      'wastePic' : url,
+      'wasteNum' :quantity,
+      'wasteDate' : date,
+      'wasteLat' : latitude,
+      'wasteLong' : longitude,
+    });
+
+    expect(wasteagramPost.wastePic, url);
+    expect(wasteagramPost.wasteNum, quantity);
+    expect(wasteagramPost.wasteDate, DateFormat.yMMMMEEEEd().format(DateTime.fromMillisecondsSinceEpoch(date)));
+    expect(wasteagramPost.wasteLat, latitude);
+    expect(wasteagramPost.wasteLong, longitude);
+
+  });
+
+  test('Test3: Post created from Map with null values has correct property values', () {
+    const url = null;
+    const quantity = null;
+    final date = DateTime.now().millisecondsSinceEpoch;
+    const latitude = null;
+    const longitude = null;
+
+    final wasteagramPost = Post.fromMap({
+      'wastePic' : url,
+      'wasteNum' :quantity,
+      'wasteDate' : date,
+      'wasteLat' : latitude,
+      'wasteLong' : longitude,
+    });
+
+    expect(wasteagramPost.wastePic,'https://firebasestorage.googleapis.com/v0/b/wasteagram-15796.appspot.com/o/no%20photo.png?alt=media&token=1190ebf9-00ae-447f-a08c-4c3224a9a519');
+    expect(wasteagramPost.wasteNum, 0);
+    expect(wasteagramPost.wasteDate, DateFormat.yMMMMEEEEd().format(DateTime.fromMillisecondsSinceEpoch(date)));
+    expect(wasteagramPost.wasteLat, '0');
+    expect(wasteagramPost.wasteLong, '0');
+
   });
 }
+  // testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  //   // Build our app and trigger a frame.
+  //   await tester.pumpWidget(const MyApp());
+
+  //   // Verify that our counter starts at 0.
+  //   expect(find.text('0'), findsOneWidget);
+  //   expect(find.text('1'), findsNothing);
+
+  //   // Tap the '+' icon and trigger a frame.
+  //   await tester.tap(find.byIcon(Icons.add));
+  //   await tester.pump();
+
+  //   // Verify that our counter has incremented.
+  //   expect(find.text('0'), findsNothing);
+  //   expect(find.text('1'), findsOneWidget);
+  // });
