@@ -25,9 +25,10 @@ class WasteListTile extends StatelessWidget {
           fontSize: 25,
           fontWeight: FontWeight.bold
       )),
-      onTap: () => 
+      onTap: () { 
         Navigator.push(context,MaterialPageRoute(
           builder: (context) => Details(details: currentPost)),
-    ));
+      );
+    });
   }
 }

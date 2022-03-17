@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 
 import 'package:wasteagram/components/submit.dart';
-import 'package:wasteagram/components/food_pic.dart';
 import 'package:wasteagram/services/photo_services.dart';
 import 'package:wasteagram/services/location.dart';
 import 'package:wasteagram/services/style.dart';
@@ -67,7 +66,15 @@ class _NewPostState extends State<NewPost> {
             child: Column(
               children: [
                 //displays foodwaste image
-                FoodPic(image: image),
+                Container(
+                  padding: const EdgeInsets.all(25),
+                  height: 300,
+                  width: 300,
+                  child: Semantics(
+                    image:true,
+                    hint:'image of wasted food',
+                    child: Image.file(image!))
+                ),
                 
                 Padding(
                   padding: const EdgeInsets.all(20),
