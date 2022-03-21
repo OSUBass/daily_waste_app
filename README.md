@@ -1,4 +1,4 @@
-# wasteagram
+# Daily Waste App
 
 Portfolio project for mobile development class at Oregon State University. Mobile app designed for Andriod written with Flutter SDK in dart.  Designed to track leftover products from a bakery at the end of each day in order to provide insight to owner allowing for inventory adjustments. 
 The app has the following functionality:
